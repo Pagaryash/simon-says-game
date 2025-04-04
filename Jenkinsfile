@@ -5,25 +5,28 @@ pipeline {
         stage('Clone Code') {
             steps {
                 echo 'Cloning the repository...'
-                // No need here, Jenkins clones it automatically via SCM
+                checkout scm
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    dockerImage = docker.build("simon-says-game")
-                }
+                echo 'Building Docker image...'
+                sh 'docker build -t simon-says-game .'
             }
         }
 
         stage('Run Docker Container') {
             steps {
-                script {
-                    dockerImage.run("-d -p 5000:80")
-                }
+                echo 'Running Docker container...'
+                sh '''
+                    docker stop simon-says-container || true
+                    docker rm simon-says-container || true
+                    docker run -d -p 5000:80 --name simon-says-container simon-says-game
+                '''
             }
         }
     }
 }
+
 
