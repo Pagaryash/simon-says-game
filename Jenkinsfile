@@ -1,52 +1,17 @@
 pipeline {
     agent any
-
-    environment {
-        DOCKER_IMAGE = 'simon-says-game:latest'
-        DOCKER_REGISTRY = 'localhost:5000'  // Change to your registry if needed
-    }
-
+    
     stages {
-        stage('Checkout') {
-            steps {
-                // Checkout the code from GitHub repository
-                checkout scm
-            }
-        }
-
-        stage('Build Docker Image') {
+        stage('Verify Docker') {
             steps {
                 script {
-                    // Build the Docker image
-                    docker.build(DOCKER_IMAGE)
+                    // Verify Docker installation
+                    sh 'docker --version'  // This will show the Docker version to confirm Docker is accessible
+                    
+                    // Optionally, list running Docker containers to confirm further access
+                    sh 'docker ps'  // This will list the running containers if Docker is working
                 }
             }
-        }
-
-        stage('Test') {
-            steps {
-                script {
-                    // Optionally run tests in the container here
-                    echo "Running tests... (Add testing scripts if needed)"
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                script {
-                    // Run the Docker container
-                    docker.run(DOCKER_IMAGE, "-d -p 5000:80")
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            // Clean up Docker containers after the pipeline is done
-            sh "docker ps -q | xargs docker stop || true"
-            sh "docker ps -aq | xargs docker rm || true"
         }
     }
 }
